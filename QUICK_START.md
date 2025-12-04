@@ -27,8 +27,9 @@ docker-compose logs -f
 ## 🎯 Première utilisation
 
 1. **Créez un compte** sur http://localhost:3001
-2. **Importez une facture** dans "Documents"
-3. **Chattez avec l'agent** dans "Agent Comptable"
+2. **Importez une facture** dans "Documents" → L'IA classifie automatiquement
+3. **Explorez le Classeur Virtuel** → Navigation Année > Catégorie > Type
+4. **Chattez avec l'agent** dans "Agent Comptable"
 
 ## 📚 Plus de détails
 

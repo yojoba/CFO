@@ -35,6 +35,12 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       UPLOAD_DIR: /app/uploads
       MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-10}
+      GOOGLE_CLOUD_VISION_API_KEY: ${GOOGLE_CLOUD_VISION_API_KEY}
+      # Filing Cabinet Configuration
+      FILING_CABINET_ROOT: /app/uploads
+      KEEP_ORIGINAL_FILES: ${KEEP_ORIGINAL_FILES:-true}
+      OCR_PDF_QUALITY: ${OCR_PDF_QUALITY:-high}
+      FILING_CABINET_YEAR_SOURCE: ${FILING_CABINET_YEAR_SOURCE:-document_date}
     volumes:
       - ./backend:/app
       - upload_data:/app/uploads

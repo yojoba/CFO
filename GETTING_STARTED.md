@@ -59,8 +59,14 @@ Ouvrez votre navigateur :
    - Allez dans "Documents"
    - Glissez-déposez une facture PDF
    - Attendez le traitement (quelques secondes)
+   - L'IA classifie automatiquement par catégorie (Impots, Assurance, etc.)
 
-3. **Testez les agents** :
+3. **Explorez le Classeur Virtuel** :
+   - Cliquez sur l'onglet "Classeur"
+   - Navigation hiérarchique : Année > Catégorie > Type
+   - Documents "Non classé" peuvent être reclassifiés manuellement
+
+4. **Testez les agents** :
    - **Agent Comptable** : "Analyse mes dépenses du mois dernier"
    - **Agent Juridique** : "Quelles sont mes obligations fiscales en Suisse?"
 
@@ -99,10 +105,17 @@ Ouvrez votre navigateur :
 
 ## Fonctionnalités disponibles
 
-### ✅ Gestion de documents
+### ✅ Gestion de documents intelligente
 - Upload de PDF et images (factures, contrats, courriers)
 - Extraction automatique de texte (OCR pour images)
-- Recherche sémantique dans vos documents
+- **Classification automatique par IA** : Type, catégorie, importance
+- **Classeur Virtuel 3 niveaux** : Année > Catégorie > Type
+- **10 catégories prédéfinies** : Impots 📋, Poursuites ⚖️, Assurance 🛡️, Banque 🏦, Energie ⚡, Telecom 📱, Santé 🏥, Immobilier 🏠, Emploi 💼, Non classé 📁
+- **Extraction de métadonnées** : Dates, montants, deadlines, mots-clés
+- **Score d'importance** : Calcul automatique 0-100 selon urgence
+- Recherche locale (dans un dossier) ou globale (tous documents)
+- Filtres avancés par montant, importance, dates
+- Sélection multiple et téléchargement en masse
 
 ### ✅ Agent Comptable
 - Analyse de vos finances
@@ -240,9 +253,17 @@ docker-compose up -d
 ## Prochaines étapes
 
 1. **Importez vos documents** : Commencez par vos factures récentes
-2. **Explorez les agents** : Posez des questions sur vos finances
-3. **Consultez le dashboard** : Suivez vos statistiques
-4. **Lisez DEPLOYMENT.md** : Pour déployer en production
+2. **Explorez le Classeur Virtuel** : Naviguez dans la hiérarchie Année > Catégorie > Type
+3. **Reclassifiez si nécessaire** : Documents "Non classé" peuvent être catégorisés manuellement
+4. **Explorez les agents** : Posez des questions sur vos finances
+5. **Consultez le dashboard** : Suivez vos statistiques
+6. **Lisez DEPLOYMENT.md** : Pour déployer en production
+
+### 📚 Documentation complémentaire
+
+- [HIERARCHIE_3_NIVEAUX_IMPLEMENTATION.md](HIERARCHIE_3_NIVEAUX_IMPLEMENTATION.md) - Guide complet du classeur hiérarchique
+- [DOCUMENT_INTELLIGENCE.md](DOCUMENT_INTELLIGENCE.md) - Intelligence documentaire et classification IA
+- [START_HERE_DOCUMENT_INTELLIGENCE.md](START_HERE_DOCUMENT_INTELLIGENCE.md) - Point de départ pour les fonctionnalités avancées
 
 ## Support
 

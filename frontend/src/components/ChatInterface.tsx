@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { Send, Loader2, User, Bot } from 'lucide-react'
+import { Send, Loader2, User, Bot, FileText } from 'lucide-react'
+import { Document } from '@/types'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -19,13 +20,16 @@ interface ChatResponse {
 
 interface ChatInterfaceProps {
   agentType: 'accountant' | 'legal'
+  initialDocumentId?: number
 }
 
-export function ChatInterface({ agentType }: ChatInterfaceProps) {
+export function ChatInterface({ agentType, initialDocumentId }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [conversationId, setConversationId] = useState<number | null>(null)
+  const [isLoadingDocument, setIsLoadingDocument] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const hasLoadedDocument = useRef(false)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -34,6 +38,58 @@ export function ChatInterface({ agentType }: ChatInterfaceProps) {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Load document and send initial message if initialDocumentId is provided
+  useEffect(() => {
+    const loadDocumentAndAnalyze = async () => {
+      if (!initialDocumentId || hasLoadedDocument.current) return;
+      
+      hasLoadedDocument.current = true;
+      setIsLoadingDocument(true);
+      
+      try {
+        // Load document details
+        const response = await api.get<Document>(`/documents/${initialDocumentId}`);
+        const document = response.data;
+        
+        // Create initial message with document context
+        const documentInfo = `📄 **${document.display_name || document.original_filename}**
+
+**Type** : ${document.document_type}
+${document.extracted_amount ? `**Montant** : ${document.extracted_amount.toFixed(2)} ${document.currency || 'CHF'}` : ''}
+${document.deadline ? `**Échéance** : ${new Date(document.deadline).toLocaleDateString('fr-CH')}` : ''}
+${document.importance_score ? `**Importance** : ${document.importance_score.toFixed(0)}/100` : ''}
+
+**Contenu extrait :**
+${document.extracted_text?.substring(0, 800) || 'Aucun texte extrait'}${document.extracted_text && document.extracted_text.length > 800 ? '...' : ''}
+
+Que peux-tu me dire sur ce document ?`;
+        
+        // Add user message
+        setMessages([{
+          role: 'user',
+          content: documentInfo,
+          timestamp: new Date(),
+        }]);
+        
+        setIsLoadingDocument(false);
+        
+        // Send to agent
+        chatMutation.mutate(documentInfo);
+        
+      } catch (error) {
+        console.error('Error loading document:', error);
+        setIsLoadingDocument(false);
+        setMessages([{
+          role: 'assistant',
+          content: 'Erreur lors du chargement du document. Veuillez réessayer.',
+          timestamp: new Date(),
+        }]);
+      }
+    };
+    
+    loadDocumentAndAnalyze();
+  }, [initialDocumentId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -99,7 +155,14 @@ export function ChatInterface({ agentType }: ChatInterfaceProps) {
     <div className="bg-white rounded-lg shadow flex flex-col h-[600px]">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.length === 0 && (
+        {isLoadingDocument && (
+          <div className="flex items-center justify-center p-4">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600 mr-3" />
+            <span className="text-gray-700">Chargement du document...</span>
+          </div>
+        )}
+        
+        {messages.length === 0 && !isLoadingDocument && !initialDocumentId && (
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">

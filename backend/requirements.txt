@@ -12,6 +12,7 @@ pgvector==0.2.4
 # Authentication
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+bcrypt==4.1.2
 pydantic[email]==2.5.0
 
 # LangChain and LLM
@@ -22,8 +23,18 @@ openai==1.6.1
 # Document processing
 pypdf2==3.0.1
 pytesseract==0.3.10
-pillow==10.1.0
+pillow==10.1.0  # Pin to 10.x for pytesseract compatibility
 python-magic==0.4.27
+google-cloud-vision==3.7.0
+python-dateutil==2.8.2
+ocrmypdf==15.4.4
+pikepdf<10  # Pin to version 9.x for compatibility with ocrmypdf
+pdfplumber==0.10.3
+
+# Image preprocessing
+opencv-python-headless==4.8.1.78  # Headless pour serveur sans GUI
+scikit-image==0.22.0  # Algorithmes de traitement d'image
+numpy==1.24.3  # Requis pour OpenCV
 
 # Utilities
 python-dotenv==1.0.0

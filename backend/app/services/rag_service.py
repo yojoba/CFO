@@ -46,6 +46,7 @@ class RAGService:
             
             # Perform vector similarity search
             # Using cosine distance (1 - cosine_similarity)
+            # Include filing cabinet metadata for agent context
             sql = text("""
                 SELECT 
                     dc.id,
@@ -55,7 +56,12 @@ class RAGService:
                     dc.document_id,
                     d.filename,
                     d.original_filename,
+                    d.display_name,
                     d.document_type,
+                    d.storage_year,
+                    d.document_date,
+                    d.file_path,
+                    d.ocr_pdf_path,
                     d.created_at,
                     1 - (dc.embedding <=> :query_embedding) as similarity
                 FROM document_chunks dc
@@ -77,7 +83,7 @@ class RAGService:
                 }
             ).fetchall()
             
-            # Format results
+            # Format results with filing cabinet metadata
             formatted_results = []
             for row in results:
                 formatted_results.append({
@@ -88,9 +94,15 @@ class RAGService:
                     "document_id": row.document_id,
                     "filename": row.filename,
                     "original_filename": row.original_filename,
+                    "display_name": row.display_name,
                     "document_type": row.document_type,
+                    "storage_year": row.storage_year,
+                    "document_date": row.document_date,
+                    "file_path": row.file_path,
+                    "ocr_pdf_path": row.ocr_pdf_path,
                     "created_at": row.created_at,
-                    "similarity": float(row.similarity)
+                    "similarity": float(row.similarity),
+                    "filing_location": f"{row.storage_year}/{row.document_type}" if row.storage_year else None
                 })
             
             logger.info(f"Found {len(formatted_results)} relevant chunks for query")
@@ -115,9 +127,16 @@ class RAGService:
         context_parts = ["Documents pertinents:\n"]
         
         for idx, result in enumerate(search_results, 1):
+            # Include filing cabinet location for agent reference
+            doc_name = result.get('display_name') or result['original_filename']
+            filing_loc = result.get('filing_location', 'Non classé')
+            doc_date = result.get('document_date', '')
+            
             context_parts.append(
-                f"\n[Document {idx}: {result['original_filename']}]\n"
-                f"{result['content']}\n"
+                f"\n[Document {idx}: {doc_name}]\n"
+                f"Classement: {filing_loc}\n"
+                f"Date: {doc_date if doc_date else 'Non spécifiée'}\n"
+                f"Contenu:\n{result['content']}\n"
             )
         
         return "\n".join(context_parts)

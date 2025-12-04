@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, FileText, MessageSquare, BarChart3 } from "lucide-react";
+import { Home, FileText, MessageSquare, BarChart3, FolderTree } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Accueil", href: "/", icon: Home },
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Documents", href: "/documents", icon: FileText },
+  { name: "Classeur", href: "/filing-cabinet", icon: FolderTree },
   { name: "Agent Comptable", href: "/chat/accountant", icon: MessageSquare },
   { name: "Agent Juridique", href: "/chat/legal", icon: MessageSquare },
 ];

@@ -5,7 +5,17 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-fra \
     tesseract-ocr-deu \
+    tesseract-ocr-eng \
     poppler-utils \
+    ghostscript \
+    unpaper \
+    pngquant \
+    gcc \
+    python3-dev \
+    libffi-dev \
+    libgl1 \
+    libglib2.0-0 \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory

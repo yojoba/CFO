@@ -18,16 +18,16 @@ interface UploadResponse {
 
 export function DocumentUploader() {
   const queryClient = useQueryClient()
-  const [selectedType, setSelectedType] = useState('invoice')
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
 
   const uploadMutation = useMutation({
-    mutationFn: async ({ file, type }: { file: File; type: string }) => {
+    mutationFn: async (file: File) => {
       const formData = new FormData()
       formData.append('file', file)
       
+      // Le type sera détecté automatiquement par l'IA
       const response = await api.post<UploadResponse>(
-        `/documents/upload?document_type=${type}`,
+        `/documents/upload?document_type=other`,
         formData,
         {
           headers: {
@@ -51,10 +51,10 @@ export function DocumentUploader() {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       acceptedFiles.forEach((file) => {
-        uploadMutation.mutate({ file, type: selectedType })
+        uploadMutation.mutate(file)
       })
     },
-    [uploadMutation, selectedType]
+    [uploadMutation]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -68,22 +68,24 @@ export function DocumentUploader() {
 
   return (
     <div className="space-y-4">
-      {/* Document Type Selector */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Type de document
-        </label>
-        <select
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="invoice">Facture</option>
-          <option value="contract">Contrat</option>
-          <option value="letter">Courrier</option>
-          <option value="receipt">Reçu</option>
-          <option value="other">Autre</option>
-        </select>
+      {/* Info Classification Automatique */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-sm p-4 border border-blue-200">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div className="ml-3 flex-1">
+            <h3 className="text-sm font-semibold text-blue-900">
+              🤖 Classification Automatique par IA
+            </h3>
+            <p className="mt-1 text-sm text-blue-700">
+              Uploadez simplement vos documents ! Notre IA détecte automatiquement le type 
+              (facture, courrier, contrat...), extrait les dates, montants et calcule le niveau d'urgence.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Dropzone */}
@@ -121,7 +123,10 @@ export function DocumentUploader() {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3" />
-            <span className="text-blue-700">Téléchargement en cours...</span>
+            <div>
+              <span className="text-blue-700 font-medium">Upload en cours...</span>
+              <p className="text-xs text-blue-600 mt-1">L'analyse IA démarrera automatiquement après l'upload</p>
+            </div>
           </div>
         </div>
       )}
@@ -150,11 +155,19 @@ export function DocumentUploader() {
               key={idx}
               className="bg-green-50 border border-green-200 rounded-lg p-4"
             >
-              <div className="flex items-center">
-                <FileText className="w-5 h-5 text-green-600 mr-3" />
-                <span className="text-green-700">
-                  {filename} téléchargé avec succès!
-                </span>
+              <div className="flex items-start">
+                <FileText className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-green-700 font-medium">
+                    ✅ {filename} uploadé avec succès !
+                  </p>
+                  <p className="text-sm text-green-600 mt-1">
+                    🔍 Analyse en cours : OCR + classification + extraction métadonnées...
+                  </p>
+                  <p className="text-xs text-green-500 mt-1">
+                    Le document apparaîtra dans la liste dès que l'analyse sera terminée (~10-15 sec)
+                  </p>
+                </div>
               </div>
             </div>
           ))}
