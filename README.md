@@ -5,7 +5,8 @@ Application de gestion financière intelligente pour les ménages suisses, avec 
 ## Architecture
 
 - **Backend**: Python 3.11 + FastAPI + LangChain
-- **Frontend**: React + Next.js 14 + TypeScript
+- **Frontend Web**: React + Next.js 14 + TypeScript
+- **Mobile Android**: Kotlin + Jetpack Compose (MVP natif)
 - **Database**: PostgreSQL 15 + pgvector pour le RAG
 - **Déploiement**: Docker + Docker Compose
 
@@ -106,9 +107,10 @@ docker-compose exec postgres psql -U agentcfo -d agentcfo -f /app/backend/migrat
 ```
 
 L'application sera accessible sur:
-- Frontend: http://localhost:3001
+- Frontend Web: http://localhost:3008
 - Backend API: http://localhost:8001
 - Documentation API: http://localhost:8001/docs
+- Application Android: Voir section [Application Mobile](#application-mobile-android-)
 
 ### Endpoints API
 
@@ -239,6 +241,8 @@ docker-compose down -v
 
 **⚠️ IMPORTANT** : Sans restart/rebuild, vos changements ne seront PAS visibles !
 
+**📝 Note** : Le frontend utilise maintenant le port **3008** au lieu de 3001.
+
 ## Structure du projet
 
 ```
@@ -258,11 +262,23 @@ AgentCFO/
 │   ├── migrations/      # 🆕 Migrations SQL
 │   ├── tests/          # Tests unitaires
 │   └── Dockerfile
-├── frontend/            # Application Next.js
+├── frontend/            # Application Web Next.js
 │   ├── src/
 │   │   ├── app/        # Pages et routes
 │   │   └── components/ # Composants React
 │   └── Dockerfile
+├── android-app/         # 📱 Application Android Native (NOUVEAU)
+│   ├── app/
+│   │   └── src/main/
+│   │       ├── java/com/agentcfo/
+│   │       │   ├── MainActivity.kt
+│   │       │   ├── network/       # API Retrofit
+│   │       │   ├── auth/          # JWT + Biométrie
+│   │       │   ├── viewmodel/     # MVVM ViewModels
+│   │       │   ├── ui/            # Jetpack Compose UI
+│   │       │   └── utils/         # Utilitaires
+│   │       └── res/               # Ressources Android
+│   └── build.gradle.kts
 └── docker-compose.yml
 ```
 
@@ -314,6 +330,135 @@ Lorsque vous uploadez un document :
 ```
 
 Le document sera automatiquement classé dans : **2024 / Energie / Factures**
+
+## 📱 Application Mobile Android (NOUVEAU)
+
+Une application Android native complète est disponible pour gérer vos documents en mobilité.
+
+### Fonctionnalités
+
+- ✅ **Authentification sécurisée** : JWT + Biométrie (empreinte/face)
+- ✅ **Upload de documents** : Caméra ou galerie
+- ✅ **Capture photo CameraX** : Prendre des photos de documents directement
+- ✅ **Liste des documents** : Avec métadonnées enrichies (importance, deadline, montant)
+- ✅ **Détails complets** : Visualisation et gestion des documents
+- ✅ **Compression automatique** : Optimisation des images avant upload
+- ✅ **Design Material 3** : Interface moderne et intuitive
+
+### Technologies
+
+- **Langage** : Kotlin
+- **UI** : Jetpack Compose
+- **Architecture** : MVVM (Model-View-ViewModel)
+- **API** : Retrofit + OkHttp
+- **Async** : Coroutines + Flow
+- **Camera** : CameraX
+- **Security** : Biometric API + DataStore
+
+### Installation et Démarrage
+
+#### Prérequis
+- Android Studio Ladybug (2024.2.1+)
+- JDK 11+
+- Android SDK 35
+- Backend démarré sur `localhost:8001`
+
+#### Configuration
+
+```bash
+# 1. Ouvrir le projet dans Android Studio
+cd android-app/
+# Ouvrir avec Android Studio
+
+# 2. Synchroniser les dépendances Gradle (automatique)
+
+# 3. S'assurer que le backend est démarré
+cd ../
+docker-compose up -d
+
+# 4. Configurer l'URL backend (si nécessaire)
+# Éditer android-app/app/build.gradle.kts
+# Dev: http://10.0.2.2:8001 (émulateur → localhost)
+# Prod: https://api.agentcfo.com
+```
+
+#### Build et Exécution
+
+**Via Android Studio** :
+1. Connecter un appareil ou lancer un émulateur (API 24+)
+2. Cliquer sur Run ▶️
+
+**Via ligne de commande** :
+```bash
+cd android-app
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Installer sur appareil connecté
+./gradlew installDebug
+
+# Build release APK (production)
+./gradlew assembleRelease
+```
+
+Les APKs générés se trouvent dans :
+- **Debug** : `app/build/outputs/apk/debug/app-debug.apk`
+- **Release** : `app/build/outputs/apk/release/app-release.apk`
+
+### Documentation Complète
+
+- **[android-app/README.md](android-app/README.md)** - Guide d'installation et usage
+- **[android-app/IMPLEMENTATION_GUIDE.md](android-app/IMPLEMENTATION_GUIDE.md)** - Documentation technique détaillée
+- **[ANDROID_APP_COMPLETE.md](ANDROID_APP_COMPLETE.md)** - Résumé de l'implémentation
+
+### Architecture Android
+
+```
+android-app/app/src/main/java/com/agentcfo/
+├── MainActivity.kt                 # Point d'entrée + Navigation
+├── network/                        # API Retrofit
+│   ├── AgentCfoApiService.kt      # Interface API
+│   ├── ApiModels.kt               # Modèles de données
+│   └── RetrofitClient.kt          # Configuration HTTP
+├── auth/                          # Authentification
+│   ├── TokenManager.kt            # Gestion JWT (DataStore)
+│   ├── BiometricAuthManager.kt    # Authentification biométrique
+│   └── AuthenticationState.kt     # État d'authentification
+├── data/                          # Repositories
+│   ├── AuthRepository.kt
+│   ├── DocumentRepository.kt
+│   └── ChatRepository.kt
+├── viewmodel/                     # ViewModels MVVM
+│   ├── AuthViewModel.kt
+│   ├── DocumentViewModel.kt
+│   └── ChatViewModel.kt
+├── ui/                            # Interface Jetpack Compose
+│   ├── auth/                      # Écrans d'authentification
+│   ├── documents/                 # Écrans de gestion documents
+│   ├── camera/                    # Écran de capture photo
+│   ├── theme/                     # Thème Material 3
+│   └── BiometricLockScreen.kt    # Verrouillage biométrique
+└── utils/                         # Utilitaires
+    ├── FileUtils.kt               # Gestion fichiers
+    └── PermissionHandler.kt       # Permissions Compose
+```
+
+### Flux de Travail Android
+
+1. **Inscription/Connexion** → Authentification JWT
+2. **Verrouillage biométrique** → Sécurité supplémentaire
+3. **Capture photo** → CameraX pour documents
+4. **Upload** → Compression + envoi au backend
+5. **Liste** → Affichage avec métadonnées
+6. **Détail** → Consultation complète du document
+
+### Notes Importantes
+
+- **Émulateur** : Utiliser `10.0.2.2` pour accéder à `localhost` du host
+- **Appareil physique** : Utiliser l'IP locale de votre machine (ex: `192.168.1.X`)
+- **Permissions** : Caméra et stockage demandées au runtime
+- **Biométrie** : Optionnelle, l'app fonctionne sans si non disponible
 
 ## Configuration Cursor
 

@@ -46,7 +46,7 @@ JWT_SECRET=votre-secret-jwt
 
 ### Frontend
 ```
-✅ Port 3001
+✅ Port 3008
 ✅ Next.js 14 + TypeScript
 ✅ Interface moderne
 ✅ Modal détail

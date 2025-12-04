@@ -11,7 +11,7 @@ cat .env.example >> .env
 docker-compose up -d
 
 # 3. Ouvrir l'application
-open http://localhost:3001
+open http://localhost:3008
 ```
 
 ## ✅ Vérification
@@ -26,7 +26,7 @@ docker-compose logs -f
 
 ## 🎯 Première utilisation
 
-1. **Créez un compte** sur http://localhost:3001
+1. **Créez un compte** sur http://localhost:3008
 2. **Importez une facture** dans "Documents" → L'IA classifie automatiquement
 3. **Explorez le Classeur Virtuel** → Navigation Année > Catégorie > Type
 4. **Chattez avec l'agent** dans "Agent Comptable"

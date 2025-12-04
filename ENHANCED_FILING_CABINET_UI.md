@@ -568,7 +568,7 @@ Header Navigation:
 
 1. **Accéder au classeur**:
    ```
-   http://localhost:3001/filing-cabinet
+   http://localhost:3008/filing-cabinet
    ```
 
 2. **Tester la recherche**:
@@ -626,7 +626,7 @@ L'interface du classeur virtuel est maintenant **production-ready** avec une exp
 
 **Status**: 🟢 READY TO USE
 
-**URL**: http://localhost:3001/filing-cabinet
+**URL**: http://localhost:3008/filing-cabinet
 
 ---
 

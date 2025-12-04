@@ -355,7 +355,7 @@ active:       "bg-blue-600 text-white"
 - Classement: 2025/letter/ ✓
 
 ### ✅ Page Filing Cabinet
-- Accessible: http://localhost:3001/filing-cabinet ✓
+- Accessible: http://localhost:3008/filing-cabinet ✓
 - Rendering: HTML complet ✓
 - Components: Chargés ✓
 - Navigation: Link actif ✓
@@ -562,12 +562,12 @@ Indexes:
 
 | URL | Description |
 |-----|-------------|
-| http://localhost:3001 | Login / Accueil |
-| http://localhost:3001/dashboard | Dashboard financier |
-| http://localhost:3001/documents | Gestion documents |
-| **http://localhost:3001/filing-cabinet** | **Classeur virtuel** ✨ |
-| http://localhost:3001/chat/accountant | Agent comptable |
-| http://localhost:3001/chat/legal | Agent juridique |
+| http://localhost:3008 | Login / Accueil |
+| http://localhost:3008/dashboard | Dashboard financier |
+| http://localhost:3008/documents | Gestion documents |
+| **http://localhost:3008/filing-cabinet** | **Classeur virtuel** ✨ |
+| http://localhost:3008/chat/accountant | Agent comptable |
+| http://localhost:3008/chat/legal | Agent juridique |
 | http://localhost:8001/docs | API documentation (Swagger) |
 
 ---

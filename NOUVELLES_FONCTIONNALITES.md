@@ -79,7 +79,7 @@ Affichage :
 
 ### 1. Rafraîchir la Page
 ```
-http://localhost:3001/documents
+http://localhost:3008/documents
 Cmd+Shift+R (Mac) ou Ctrl+Shift+F5 (Windows)
 ```
 
@@ -182,7 +182,7 @@ Pour en savoir plus :
 
 **Rafraîchissez la page documents et profitez de toutes les nouvelles fonctionnalités !**
 
-http://localhost:3001/documents
+http://localhost:3008/documents
 
 ---
 

@@ -147,7 +147,7 @@ cp .env.example .env
 docker-compose up -d
 
 # Accéder
-open http://localhost:3001
+open http://localhost:3008
 ```
 
 ### 2. Tests

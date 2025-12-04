@@ -240,7 +240,7 @@ Onglet "Par échéance" → Deadlines proches
 
 ### Test 1 : Modal Détail
 ```
-1. Rafraîchir http://localhost:3001/documents (Cmd+Shift+R)
+1. Rafraîchir http://localhost:3008/documents (Cmd+Shift+R)
 2. Cliquer sur "Sommation Impôt Cantonal..."
 3. Modal s'ouvre → ✅
 4. Voir 3 onglets → ✅
@@ -332,7 +332,7 @@ Votre application AgentCFO est maintenant :
 
 ### Étape 1
 ```
-http://localhost:3001/documents
+http://localhost:3008/documents
 Cmd+Shift+R (Hard Refresh)
 ```
 

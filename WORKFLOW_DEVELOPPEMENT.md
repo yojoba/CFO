@@ -116,7 +116,7 @@ docker-compose up -d frontend
 docker-compose logs --tail=30 frontend
 
 # 4. Tester dans le navigateur
-# Ouvrir http://localhost:3001
+# Ouvrir http://localhost:3008
 # Faire un hard refresh (Cmd+Shift+R ou Ctrl+Shift+R)
 ```
 

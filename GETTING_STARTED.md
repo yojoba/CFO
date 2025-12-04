@@ -45,13 +45,13 @@ docker-compose logs -f
 
 Ouvrez votre navigateur :
 
-- **Frontend** : http://localhost:3001
+- **Frontend** : http://localhost:3008
 - **API Documentation** : http://localhost:8001/docs
 
 ### 4. Première utilisation
 
 1. **Créez un compte** : 
-   - Allez sur http://localhost:3001
+   - Allez sur http://localhost:3008
    - Cliquez sur "Inscription"
    - Remplissez le formulaire
 
@@ -74,7 +74,7 @@ Ouvrez votre navigateur :
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    localhost:3001                    │
+│                    localhost:3008                    │
 │                   Frontend Next.js                   │
 └──────────────────────┬──────────────────────────────┘
                        │
@@ -235,7 +235,7 @@ C'est normal pour les premières utilisations. L'extraction de texte et la gén�
 
 ### Port déjà utilisé
 
-Si les ports 3001, 8001 ou 5433 sont déjà utilisés sur votre système, modifiez-les dans `.env` :
+Si les ports 3008, 8001 ou 5433 sont déjà utilisés sur votre système, modifiez-les dans `.env` :
 
 ```bash
 FRONTEND_PORT=3002

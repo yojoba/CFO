@@ -14,7 +14,7 @@
 docker-compose up -d
 
 # 2. Ouvrir dans le navigateur
-http://localhost:3001/documents
+http://localhost:3008/documents
 
 # 3. C'est tout ! ✅
 ```
@@ -95,7 +95,7 @@ Votre système est **complet, testé et opérationnel**.
 **Rafraîchissez la page et profitez-en** :
 
 ```
-http://localhost:3001/documents
+http://localhost:3008/documents
 Cmd+Shift+R
 ```
 

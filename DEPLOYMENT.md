@@ -29,7 +29,7 @@ JWT_EXPIRATION_MINUTES=1440
 MAX_UPLOAD_SIZE_MB=10
 
 # Frontend
-FRONTEND_PORT=3001
+FRONTEND_PORT=3008
 NEXT_PUBLIC_API_URL=https://votre-domaine.ch/api
 NODE_ENV=production
 ```
@@ -49,7 +49,7 @@ docker-compose logs -f
 
 ### 3. Accès aux services
 
-- Frontend: http://localhost:3001
+- Frontend: http://localhost:3008
 - Backend API: http://localhost:8001
 - Documentation API: http://localhost:8001/docs
 
@@ -81,7 +81,7 @@ NEXT_PUBLIC_API_URL=https://agentcfo.votre-domaine.ch/api
 # Ports non utilisés sur le système
 POSTGRES_PORT=5433
 BACKEND_PORT=8001
-FRONTEND_PORT=3001
+FRONTEND_PORT=3008
 ```
 
 ### 3. Configuration du reverse proxy existant
@@ -98,7 +98,7 @@ upstream agentcfo_backend {
 
 # Frontend
 upstream agentcfo_frontend {
-    server localhost:3001;
+    server localhost:3008;
 }
 
 server {

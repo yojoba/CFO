@@ -124,7 +124,7 @@
 ## ✅ Quick Links
 
 ### Applications
-- Frontend : http://localhost:3001
+- Frontend : http://localhost:3008
 - Backend API : http://localhost:8001
 - API Docs : http://localhost:8001/docs
 

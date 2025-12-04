@@ -12,7 +12,7 @@ Statut : **Production Ready**
 ### 1. **Uploader des Documents** 📤
 
 ```
-1. http://localhost:3001/documents
+1. http://localhost:3008/documents
 2. Glisser-déposer n'importe quel document
 3. Attendre 10-20 secondes
 4. Document apparaît avec :
@@ -246,7 +246,7 @@ Total                : 10-20s (arrière-plan)
 
 ```bash
 # 1. Rafraîchir
-http://localhost:3001/documents
+http://localhost:3008/documents
 Cmd+Shift+R
 
 # 2. Cliquer sur "Sommation Impôt..."

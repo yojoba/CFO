@@ -258,7 +258,7 @@ curl http://localhost:8001/openapi.json > openapi.json
 ```bash
 # Port déjà utilisé
 lsof -ti:8001 | xargs kill -9  # Backend
-lsof -ti:3001 | xargs kill -9  # Frontend
+lsof -ti:3008 | xargs kill -9  # Frontend
 lsof -ti:5433 | xargs kill -9  # PostgreSQL
 
 # Nettoyer tout Docker
@@ -349,9 +349,168 @@ crontab -e
 # Ajouter: 0 2 * * * /opt/agentcfo/backup.sh
 ```
 
+## 📱 Android App
+
+### Build et installation
+```bash
+# Naviguer vers le projet Android
+cd android-app/
+
+# Vérifier la version de Gradle
+./gradlew --version
+
+# Nettoyer le build
+./gradlew clean
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Build release APK (production)
+./gradlew assembleRelease
+
+# Installer sur appareil/émulateur connecté
+./gradlew installDebug
+
+# Build et installer en une commande
+./gradlew installDebug --rerun-tasks
+```
+
+### Tests Android
+```bash
+# Lancer les tests unitaires
+./gradlew test
+
+# Tests instrumentés (nécessite appareil/émulateur)
+./gradlew connectedAndroidTest
+
+# Tests avec rapport détaillé
+./gradlew test --info
+
+# Voir les résultats des tests
+open app/build/reports/tests/testDebugUnitTest/index.html
+```
+
+### Debug et logs
+```bash
+# Voir les logs Android en temps réel
+adb logcat | grep AgentCFO
+
+# Voir tous les logs de l'app
+adb logcat -s AgentCFO:*
+
+# Effacer les logs
+adb logcat -c
+
+# Voir les appareils connectés
+adb devices
+
+# Informations sur l'appareil
+adb shell getprop ro.build.version.release  # Version Android
+adb shell getprop ro.product.model          # Modèle appareil
+```
+
+### APK Management
+```bash
+# Installer un APK
+adb install app/build/outputs/apk/debug/app-debug.apk
+
+# Réinstaller (écrase l'ancienne version)
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+# Désinstaller l'app
+adb uninstall com.agentcfo
+
+# Vérifier si l'app est installée
+adb shell pm list packages | grep agentcfo
+
+# Lancer l'app
+adb shell am start -n com.agentcfo/.MainActivity
+
+# Forcer arrêt de l'app
+adb shell am force-stop com.agentcfo
+```
+
+### Gradle maintenance
+```bash
+# Arrêter tous les daemons Gradle
+./gradlew --stop
+
+# Rafraîchir les dépendances
+./gradlew build --refresh-dependencies
+
+# Build avec logs détaillés
+./gradlew build --stacktrace --info
+
+# Voir toutes les tâches disponibles
+./gradlew tasks --all
+
+# Nettoyer complètement
+./gradlew clean
+rm -rf .gradle app/build
+
+# Vérifier la configuration du projet
+./gradlew projects
+./gradlew dependencies
+```
+
+### Configuration backend pour Android
+```bash
+# L'émulateur Android utilise 10.0.2.2 pour accéder au localhost du host
+
+# Vérifier que le backend est accessible
+curl http://10.0.2.2:8001/health
+
+# Depuis l'appareil physique, utiliser l'IP locale
+# Trouver votre IP locale
+ifconfig | grep "inet " | grep -v 127.0.0.1
+
+# Exemple: 192.168.1.100:8001
+```
+
+### Permissions et cache
+```bash
+# Effacer les données de l'app
+adb shell pm clear com.agentcfo
+
+# Révoquer les permissions
+adb shell pm revoke com.agentcfo android.permission.CAMERA
+adb shell pm revoke com.agentcfo android.permission.READ_EXTERNAL_STORAGE
+
+# Accorder les permissions (pour tests)
+adb shell pm grant com.agentcfo android.permission.CAMERA
+adb shell pm grant com.agentcfo android.permission.READ_MEDIA_IMAGES
+
+# Voir le stockage utilisé
+adb shell du -h /data/data/com.agentcfo
+```
+
+### Android Studio alternative (CLI)
+```bash
+# Si Android Studio n'est pas disponible
+
+# 1. S'assurer que JAVA_HOME est configuré
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# 2. Configurer ANDROID_HOME
+export ANDROID_HOME=~/Library/Android/sdk
+export PATH="$ANDROID_HOME/platform-tools:$PATH"
+
+# 3. Vérifier
+java -version
+adb version
+
+# 4. Build
+cd android-app
+./gradlew assembleDebug
+
+# 5. Installer
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
 ## 🚀 Quick Start
 
-### Premier lancement
+### Premier lancement (Web)
 ```bash
 # 1. Configuration
 cp .env.example .env
@@ -364,8 +523,28 @@ docker-compose up -d --build
 docker-compose ps
 docker-compose logs -f
 
-# 4. Ouvrir l'app
-open http://localhost:3001
+# 4. Ouvrir l'app web
+open http://localhost:3008
+```
+
+### Premier lancement (Android)
+```bash
+# 1. S'assurer que le backend est démarré
+docker-compose up -d
+
+# 2. Configurer Java (si nécessaire)
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# 3. Build l'app Android
+cd android-app
+./gradlew assembleDebug
+
+# 4. Installer sur émulateur/appareil
+./gradlew installDebug
+
+# 5. Lancer l'app manuellement ou via :
+adb shell am start -n com.agentcfo/.MainActivity
 ```
 
 ### Redémarrage quotidien
@@ -422,8 +601,20 @@ docker system prune -a --volumes
 
 ## 🔗 Liens utiles
 
-- Frontend: http://localhost:3001
+### Web
+- Frontend: http://localhost:3008
 - Backend API: http://localhost:8001
 - API Docs: http://localhost:8001/docs
 - PostgreSQL: localhost:5433
+
+### Android
+- Projet: `android-app/`
+- APK Debug: `android-app/app/build/outputs/apk/debug/app-debug.apk`
+- APK Release: `android-app/app/build/outputs/apk/release/app-release.apk`
+- Documentation: `android-app/README.md`
+
+### Documentation
+- README principal: [README.md](../../README.md)
+- Android: [android-app/IMPLEMENTATION_GUIDE.md](../../android-app/IMPLEMENTATION_GUIDE.md)
+- Intelligence Doc: [START_HERE_DOCUMENT_INTELLIGENCE.md](../../START_HERE_DOCUMENT_INTELLIGENCE.md)
 

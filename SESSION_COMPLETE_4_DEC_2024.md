@@ -272,7 +272,7 @@ Upload Document
 
 ### 1. Rafraîchir l'Interface
 ```
-http://localhost:3001/documents
+http://localhost:3008/documents
 Hard Refresh : Cmd+Shift+R
 ```
 
@@ -496,7 +496,7 @@ Tout est **asynchrone** - l'utilisateur voit une réponse immédiate !
 ## 🚀 Prochaines Actions Recommandées
 
 ### Immédiat
-1. ✅ Rafraîchir http://localhost:3001/documents
+1. ✅ Rafraîchir http://localhost:3008/documents
 2. ✅ Vérifier les 4 onglets
 3. ✅ Voir les noms intelligents
 4. ✅ Tester un upload
@@ -545,7 +545,7 @@ Vous avez maintenant :
 
 ## 🎯 RAFRAÎCHISSEZ MAINTENANT !
 
-**http://localhost:3001/documents** + Hard Refresh (Cmd+Shift+R)
+**http://localhost:3008/documents** + Hard Refresh (Cmd+Shift+R)
 
 Vous devriez voir :
 - ✨ 4 onglets de navigation

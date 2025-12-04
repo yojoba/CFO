@@ -10,7 +10,7 @@
 - LLM: OpenAI GPT-4/GPT-4-turbo via API
 - Embeddings: OpenAI text-embedding-3-small
 
-### Frontend (TypeScript/Next.js)
+### Frontend Web (TypeScript/Next.js)
 - Next.js 14 avec App Router
 - TypeScript strict mode
 - Tailwind CSS pour le styling
@@ -18,10 +18,21 @@
 - Zustand pour state management
 - Axios pour les requêtes HTTP
 
+### Mobile Android (Kotlin/Jetpack Compose) 🆕
+- Kotlin 2.1.0
+- Jetpack Compose (Material 3)
+- Architecture MVVM
+- Retrofit + OkHttp pour API
+- Coroutines + Flow pour async
+- CameraX pour capture photo
+- Biometric API + DataStore
+- Navigation Compose
+
 ### Infrastructure
 - Docker Compose pour orchestration
-- 3 services: backend (port 8001), frontend (port 3001), postgres (port 5433)
+- 3 services: backend (port 8001), frontend (port 3008), postgres (port 5433)
 - Variables d'environnement dans .env (jamais committer)
+- Application Android standalone (android-app/)
 
 ## ⚠️ IMPORTANT - Workflow de Développement Docker
 
@@ -63,7 +74,7 @@ docker-compose logs -f backend
 docker-compose logs -f frontend
 
 # Tester l'application
-# Frontend: http://localhost:3001
+# Frontend: http://localhost:3008
 # Backend API: http://localhost:8001/docs
 ```
 
@@ -97,6 +108,37 @@ docker-compose up -d --build frontend
 ```
 
 ## Conventions de code
+
+### Android Kotlin
+```kotlin
+// Nommage
+- Classes: UpperCamelCase (ex: DocumentViewModel, AuthRepository)
+- Fonctions/variables: camelCase (ex: uploadDocument, isLoggedIn)
+- Constantes: UPPER_SNAKE_CASE (ex: API_BASE_URL)
+- Packages: lowercase (ex: com.agentcfo.network)
+
+// Architecture MVVM
+- Repository: Gestion des données et API calls
+- ViewModel: Logique métier et états UI
+- Composables: UI déclarative avec Compose
+
+// StateFlow pour états réactifs
+val documentsState = MutableStateFlow<DocumentsState>(DocumentsState.Initial)
+
+// Coroutines pour async
+suspend fun uploadDocument(file: File): Result<DocumentResponse> {
+    return withContext(Dispatchers.IO) {
+        // API call
+    }
+}
+
+// Type-safe navigation
+NavHost(navController, startDestination = "welcome") {
+    composable("document/{id}") { backStackEntry ->
+        val id = backStackEntry.arguments?.getInt("id")
+    }
+}
+```
 
 ### Backend Python
 ```python
@@ -167,7 +209,7 @@ backend/app/
 └── main.py       # Point d'entrée FastAPI
 ```
 
-### Frontend
+### Frontend Web
 ```
 frontend/src/
 ├── app/          # Pages Next.js (App Router)
@@ -175,6 +217,28 @@ frontend/src/
 ├── lib/          # Utilitaires (api, utils)
 ├── stores/       # State management (Zustand)
 └── types/        # Types TypeScript partagés
+```
+
+### Mobile Android
+```
+android-app/app/src/main/java/com/agentcfo/
+├── MainActivity.kt           # Point d'entrée + Navigation
+├── network/                  # Couche API
+│   ├── AgentCfoApiService.kt  # Interface Retrofit
+│   ├── ApiModels.kt           # Data classes
+│   └── RetrofitClient.kt      # Configuration HTTP
+├── auth/                     # Authentification
+│   ├── TokenManager.kt        # Gestion JWT
+│   ├── BiometricAuthManager.kt # Biométrie
+│   └── AuthenticationState.kt
+├── data/                     # Repositories
+├── viewmodel/                # ViewModels MVVM
+├── ui/                       # Jetpack Compose screens
+│   ├── auth/                  # Login, Register, Welcome
+│   ├── documents/             # Documents, Detail, Upload
+│   ├── camera/                # CameraX capture
+│   └── theme/                 # Material 3 theme
+└── utils/                    # FileUtils, Permissions
 ```
 
 ## Règles de développement
@@ -231,7 +295,7 @@ frontend/src/
 4. **✅ TESTER** : http://localhost:8001/docs
 5. Créer fonction API côté frontend dans composant/page
 6. **⚠️ REBUILD frontend** : `docker-compose build frontend && docker-compose up -d frontend`
-7. **✅ TESTER** : http://localhost:3001
+7. **✅ TESTER** : http://localhost:3008
 8. Gérer loading et error states
 
 ### Ajouter un nouveau modèle DB
@@ -346,6 +410,40 @@ docker-compose exec backend pytest tests/test_document_agent.py -v
 docker-compose exec backend tesseract --version
 ```
 
+## Commandes Android utiles
+
+```bash
+# Naviguer vers le projet Android
+cd android-app/
+
+# Build debug APK
+./gradlew assembleDebug
+
+# Build release APK
+./gradlew assembleRelease
+
+# Installer sur appareil/émulateur
+./gradlew installDebug
+
+# Nettoyer le build
+./gradlew clean
+
+# Lancer les tests
+./gradlew test
+
+# Voir les tâches disponibles
+./gradlew tasks
+
+# Build avec logs détaillés
+./gradlew build --stacktrace --info
+
+# Vérifier la version de Gradle
+./gradlew --version
+
+# Arrêter les daemons Gradle
+./gradlew --stop
+```
+
 ## Dépannage
 
 ### Backend ne démarre pas
@@ -357,6 +455,14 @@ docker-compose exec backend tesseract --version
 - Nettoyer cache: `docker-compose exec frontend rm -rf .next`
 - Réinstaller deps: dans frontend local `npm install`
 - Rebuild: `docker-compose build frontend`
+
+### Android erreurs de build
+- Nettoyer: `cd android-app && ./gradlew clean`
+- Refresh deps: `./gradlew build --refresh-dependencies`
+- Arrêter daemons: `./gradlew --stop`
+- Invalidate caches dans Android Studio
+- Vérifier JAVA_HOME: `echo $JAVA_HOME` (doit pointer vers JDK 11+)
+- Synchroniser Gradle dans Android Studio
 
 ### Problèmes d'authentification
 - Vérifier JWT_SECRET dans .env

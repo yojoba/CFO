@@ -38,7 +38,7 @@ L'intégration entre les documents et les agents IA est maintenant **100% foncti
 
 #### 1. Ouvrir la Page Documents
 ```
-http://localhost:3001/documents
+http://localhost:3008/documents
 Hard Refresh : Cmd+Shift+R
 ```
 

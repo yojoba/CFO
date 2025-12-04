@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 10
     
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3008"]
     
     # RAG Configuration
     CHUNK_SIZE: int = 500

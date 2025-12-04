@@ -256,7 +256,7 @@ docker-compose exec backend pytest tests/ -v
 
 ### Uploader un Document
 
-1. Aller sur http://localhost:3001
+1. Aller sur http://localhost:3008
 2. Se connecter
 3. Aller dans "Documents"
 4. Cliquer "Upload Document"
@@ -384,7 +384,7 @@ En cas de problème:
 **Features**: Filing Cabinet + Auto-Crop  
 **Status**: 🟢 READY FOR PRODUCTION  
 **Backend**: http://localhost:8001  
-**Frontend**: http://localhost:3001  
+**Frontend**: http://localhost:3008  
 
 ---
 

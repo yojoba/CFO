@@ -213,7 +213,7 @@ AgentCFO/
 - Docker Desktop ou Docker Engine + Docker Compose
 - 4GB RAM minimum
 - Clé API OpenAI
-- Ports disponibles: 3001, 8001, 5433
+- Ports disponibles: 3008, 8001, 5433
 
 ### Production (VPS Infomaniak)
 - VPS avec Docker installé
@@ -235,7 +235,7 @@ cp .env.example .env
 docker-compose up -d
 
 # 3. Accéder
-# Frontend: http://localhost:3001
+# Frontend: http://localhost:3008
 # API: http://localhost:8001/docs
 ```
 
@@ -270,7 +270,7 @@ Internet
     ↓
 [Reverse Proxy Nginx/Apache]
     ↓
-    ├─→ Frontend (port 3001) → Next.js
+    ├─→ Frontend (port 3008) → Next.js
     └─→ Backend (port 8001) → FastAPI → PostgreSQL (port 5433)
 ```
 

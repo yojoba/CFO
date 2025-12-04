@@ -108,7 +108,7 @@ All new endpoints are available and tested:
 ## ✅ Frontend
 
 ### Status
-- **Frontend**: ✅ RUNNING on http://localhost:3001
+- **Frontend**: ✅ RUNNING on http://localhost:3008
 - **Backend API**: ✅ RUNNING on http://localhost:8001
 - **Database**: ✅ HEALTHY
 

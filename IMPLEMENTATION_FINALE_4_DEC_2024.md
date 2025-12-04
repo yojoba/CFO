@@ -274,7 +274,7 @@ Clic "Agent Comptable"
 
 ### Test 1 : Interface Moderne
 ```
-1. http://localhost:3001/documents + Cmd+Shift+R
+1. http://localhost:3008/documents + Cmd+Shift+R
 2. Vérifier 4 onglets visibles
 3. Vérifier noms intelligents affichés
 4. Vérifier badges colorés
@@ -376,7 +376,7 @@ Vous avez maintenant un **système complet et professionnel** de gestion documen
 
 ### Flow Complet à Tester
 
-1. **Rafraîchir** : http://localhost:3001/documents (Cmd+Shift+R)
+1. **Rafraîchir** : http://localhost:3008/documents (Cmd+Shift+R)
 
 2. **Voir l'interface moderne** :
    - 4 onglets
@@ -486,7 +486,7 @@ Tout est documenté :
 **TESTEZ MAINTENANT LE FLOW COMPLET :**
 
 ```
-1. http://localhost:3001/documents (Cmd+Shift+R)
+1. http://localhost:3008/documents (Cmd+Shift+R)
 2. Clic sur un document
 3. Modal s'ouvre avec 3 onglets
 4. Clic "Agent Comptable"
