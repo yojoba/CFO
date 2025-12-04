@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: ankane/pgvector:v0.5.1
+    container_name: agentcfo_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-agentcfo}
+      POSTGRES_USER: ${POSTGRES_USER:-agentcfo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agentcfo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agentcfo_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agentcfo_backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-agentcfo}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-agentcfo}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-1440}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-10}
+    volumes:
+      - ./backend:/app
+      - upload_data:/app/uploads
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - agentcfo_network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: agentcfo_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
+      NODE_ENV: ${NODE_ENV:-development}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    depends_on:
+      - backend
+    networks:
+      - agentcfo_network
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  upload_data:
+
+networks:
+  agentcfo_network:
+    driver: bridge
