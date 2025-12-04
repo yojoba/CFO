@@ -30,12 +30,14 @@ android {
                 "proguard-rules.pro"
             )
             // Production API URL
-            buildConfigField("String", "API_BASE_URL", "\"https://api.agentcfo.com\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://cfo.flowbiz.ai\"")
         }
         debug {
             isMinifyEnabled = false
-            // Dev API URL (Android emulator accessing localhost)
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8001\"")
+            // Production API URL for testing
+            buildConfigField("String", "API_BASE_URL", "\"https://cfo.flowbiz.ai\"")
+            // For local development, uncomment below:
+            // buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8001\"")
         }
     }
     

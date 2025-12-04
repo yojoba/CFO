@@ -33,7 +33,7 @@ Application Android native pour AgentCFO - Gestion financière intelligente avec
 L'application se connecte au backend FastAPI AgentCFO :
 
 - **Dev** : `http://10.0.2.2:8001` (émulateur Android → localhost)
-- **Production** : `https://api.agentcfo.com`
+- **Production** : `https://cfo.flowbiz.ai`
 
 Assurez-vous que le backend est démarré avant de lancer l'app :
 

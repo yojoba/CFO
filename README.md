@@ -379,7 +379,7 @@ docker-compose up -d
 # 4. Configurer l'URL backend (si nécessaire)
 # Éditer android-app/app/build.gradle.kts
 # Dev: http://10.0.2.2:8001 (émulateur → localhost)
-# Prod: https://api.agentcfo.com
+# Prod: https://cfo.flowbiz.ai
 ```
 
 #### Build et Exécution

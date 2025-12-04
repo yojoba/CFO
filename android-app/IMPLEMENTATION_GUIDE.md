@@ -106,7 +106,7 @@ docker-compose up -d
 
 L'application se connecte automatiquement à:
 - **Dev**: `http://10.0.2.2:8001` (émulateur → localhost)
-- **Production**: `https://api.agentcfo.com` (build release)
+- **Production**: `https://cfo.flowbiz.ai` (build release)
 
 Pour modifier l'URL:
 - Éditer `BuildConfig.API_BASE_URL` dans `app/build.gradle.kts`
@@ -258,7 +258,7 @@ sdk.dir=/Users/YOUR_USERNAME/Library/Android/sdk
 - Minification désactivée
 
 **Release**:
-- Base URL: `https://api.agentcfo.com`
+- Base URL: `https://cfo.flowbiz.ai`
 - Logging désactivé
 - Minification + obfuscation ProGuard
 

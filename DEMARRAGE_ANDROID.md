@@ -132,6 +132,11 @@ ifconfig | grep "inet " | grep -v 127.0.0.1
 defaultConfig {
     buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.100:8001\"")
 }
+
+// Ou utiliser directement la production :
+defaultConfig {
+    buildConfigField("String", "API_BASE_URL", "\"https://cfo.flowbiz.ai\"")
+}
 ```
 
 3. **Rebuild** :
