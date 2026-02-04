@@ -84,6 +84,7 @@ class ImagePreprocessingService:
     def detect_and_crop_document(self, img: np.ndarray) -> Optional[np.ndarray]:
         """
         Detect document contours and apply perspective transform to crop.
+        Uses multiple detection methods for better reliability.
         
         Args:
             img: OpenCV image (BGR)
@@ -93,63 +94,210 @@ class ImagePreprocessingService:
         """
         try:
             height, width = img.shape[:2]
+            image_area = width * height
             
+            # Method 1: Enhanced edge detection with adaptive thresholds
+            result = self._detect_with_adaptive_canny(img, image_area)
+            if result is not None:
+                logger.debug("Document detected using adaptive Canny method")
+                return result
+            
+            # Method 2: Morphological operations for better edge detection
+            result = self._detect_with_morphology(img, image_area)
+            if result is not None:
+                logger.debug("Document detected using morphological method")
+                return result
+            
+            # Method 3: Adaptive thresholding for documents with varying lighting
+            result = self._detect_with_adaptive_threshold(img, image_area)
+            if result is not None:
+                logger.debug("Document detected using adaptive threshold method")
+                return result
+            
+            # Method 4: Fallback to simple bounding box if document is mostly rectangular
+            result = self._detect_with_bounding_box(img, image_area)
+            if result is not None:
+                logger.debug("Document detected using bounding box fallback")
+                return result
+            
+            logger.debug("All detection methods failed")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error in document detection: {e}", exc_info=True)
+            return None
+    
+    def _detect_with_adaptive_canny(self, img: np.ndarray, image_area: float) -> Optional[np.ndarray]:
+        """Detect document using adaptive Canny edge detection."""
+        try:
             # Convert to grayscale
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
-            # Apply Gaussian blur to reduce noise
-            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+            # Apply bilateral filter to reduce noise while keeping edges
+            filtered = cv2.bilateralFilter(gray, 9, 75, 75)
             
-            # Edge detection
-            edges = cv2.Canny(blurred, 50, 150)
+            # Calculate adaptive thresholds based on image statistics
+            mean_val = np.mean(filtered)
+            std_val = np.std(filtered)
+            lower = max(50, int(mean_val - std_val))
+            upper = min(200, int(mean_val + std_val * 2))
+            
+            # Edge detection with adaptive thresholds
+            edges = cv2.Canny(filtered, lower, upper)
+            
+            # Dilate edges to connect broken lines
+            kernel = np.ones((3, 3), np.uint8)
+            edges = cv2.dilate(edges, kernel, iterations=2)
+            edges = cv2.erode(edges, kernel, iterations=1)
             
             # Find contours
             contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
-            # Find the largest contour
             if not contours:
                 return None
             
-            largest_contour = max(contours, key=cv2.contourArea)
+            # Sort contours by area (descending)
+            contours = sorted(contours, key=cv2.contourArea, reverse=True)
             
-            # Check if contour is large enough
-            contour_area = cv2.contourArea(largest_contour)
-            image_area = width * height
-            if contour_area < image_area * self.min_area_ratio:
-                logger.debug(f"Contour too small: {contour_area}/{image_area}")
+            # Try top 3 largest contours
+            for contour in contours[:3]:
+                area = cv2.contourArea(contour)
+                if area < image_area * self.min_area_ratio:
+                    continue
+                
+                # Approximate with more tolerance
+                epsilon = 0.03 * cv2.arcLength(contour, True)
+                approx = cv2.approxPolyDP(contour, epsilon, True)
+                
+                # Accept 4-8 points (more flexible)
+                if 4 <= len(approx) <= 8:
+                    # If more than 4 points, simplify to 4
+                    if len(approx) > 4:
+                        # Get bounding rectangle
+                        x, y, w, h = cv2.boundingRect(contour)
+                        pts = np.array([[x, y], [x+w, y], [x+w, y+h], [x, y+h]], dtype="float32")
+                    else:
+                        pts = self._order_points(approx.reshape(-1, 2))
+                    
+                    warped = self._four_point_transform(img, pts)
+                    # Validate result (should be reasonable size)
+                    if warped.shape[0] > 50 and warped.shape[1] > 50:
+                        return warped
+            
+            return None
+        except Exception as e:
+            logger.debug(f"Adaptive Canny method failed: {e}")
+            return None
+    
+    def _detect_with_morphology(self, img: np.ndarray, image_area: float) -> Optional[np.ndarray]:
+        """Detect document using morphological operations."""
+        try:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # Apply adaptive thresholding
+            binary = cv2.adaptiveThreshold(
+                gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                cv2.THRESH_BINARY_INV, 11, 2
+            )
+            
+            # Morphological operations to close gaps
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+            closed = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, iterations=3)
+            
+            # Find contours
+            contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            
+            if not contours:
                 return None
             
-            # Approximate contour to polygon
-            epsilon = 0.02 * cv2.arcLength(largest_contour, True)
-            approx = cv2.approxPolyDP(largest_contour, epsilon, True)
+            # Get largest contour
+            largest = max(contours, key=cv2.contourArea)
+            area = cv2.contourArea(largest)
             
-            # If we have 4 points, we found a quadrilateral (document)
-            if len(approx) == 4:
-                # Order points: top-left, top-right, bottom-right, bottom-left
-                pts = self._order_points(approx.reshape(4, 2))
-                
-                # Apply perspective transform
-                warped = self._four_point_transform(img, pts)
-                
-                return warped
+            if area < image_area * self.min_area_ratio:
+                return None
             
-            # If not exactly 4 points, try to find bounding rectangle
-            rect = cv2.minAreaRect(largest_contour)
-            box = cv2.boxPoints(rect)
-            box = np.int0(box)
+            # Get bounding rectangle
+            x, y, w, h = cv2.boundingRect(largest)
+            pts = np.array([[x, y], [x+w, y], [x+w, y+h], [x, y+h]], dtype="float32")
             
-            # Check if rotation is minimal (document already aligned)
-            angle = rect[2]
-            if abs(angle) < 45:
-                # Use bounding box
-                pts = self._order_points(box)
-                warped = self._four_point_transform(img, pts)
+            warped = self._four_point_transform(img, pts)
+            if warped.shape[0] > 50 and warped.shape[1] > 50:
                 return warped
             
             return None
-            
         except Exception as e:
-            logger.error(f"Error in document detection: {e}")
+            logger.debug(f"Morphology method failed: {e}")
+            return None
+    
+    def _detect_with_adaptive_threshold(self, img: np.ndarray, image_area: float) -> Optional[np.ndarray]:
+        """Detect document using adaptive thresholding."""
+        try:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # Multiple thresholding attempts
+            for block_size in [11, 15, 21]:
+                binary = cv2.adaptiveThreshold(
+                    gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                    cv2.THRESH_BINARY_INV, block_size, 2
+                )
+                
+                # Find contours
+                contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                
+                if not contours:
+                    continue
+                
+                # Try largest contour
+                largest = max(contours, key=cv2.contourArea)
+                area = cv2.contourArea(largest)
+                
+                if area >= image_area * self.min_area_ratio:
+                    x, y, w, h = cv2.boundingRect(largest)
+                    pts = np.array([[x, y], [x+w, y], [x+w, y+h], [x, y+h]], dtype="float32")
+                    warped = self._four_point_transform(img, pts)
+                    if warped.shape[0] > 50 and warped.shape[1] > 50:
+                        return warped
+            
+            return None
+        except Exception as e:
+            logger.debug(f"Adaptive threshold method failed: {e}")
+            return None
+    
+    def _detect_with_bounding_box(self, img: np.ndarray, image_area: float) -> Optional[np.ndarray]:
+        """Fallback: simple bounding box detection."""
+        try:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # Otsu's thresholding
+            _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            
+            # Find all non-zero pixels
+            coords = np.column_stack(np.where(binary > 0))
+            
+            if len(coords) == 0:
+                return None
+            
+            # Get bounding box
+            rect = cv2.minAreaRect(coords)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            
+            # Check area
+            box_area = cv2.contourArea(box)
+            if box_area < image_area * self.min_area_ratio:
+                return None
+            
+            # Order points and transform
+            pts = self._order_points(box.astype("float32"))
+            warped = self._four_point_transform(img, pts)
+            
+            if warped.shape[0] > 50 and warped.shape[1] > 50:
+                return warped
+            
+            return None
+        except Exception as e:
+            logger.debug(f"Bounding box method failed: {e}")
             return None
     
     def _order_points(self, pts: np.ndarray) -> np.ndarray:

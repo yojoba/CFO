@@ -25,7 +25,11 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 10
     
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3008"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000", 
+        "http://localhost:3008",
+        "https://cfoweb.flowbiz.ai"
+    ]
     
     # RAG Configuration
     CHUNK_SIZE: int = 500
@@ -55,7 +59,7 @@ class Settings(BaseSettings):
     ENABLE_DESKEW: bool = True  # Automatically straighten rotated documents
     ENABLE_CONTRAST_ENHANCEMENT: bool = True  # Improve contrast with CLAHE
     ENABLE_NOISE_REDUCTION: bool = True  # Reduce noise while preserving edges
-    MIN_DOCUMENT_AREA_RATIO: float = 0.1  # Minimum document area (10% of image)
+    MIN_DOCUMENT_AREA_RATIO: float = 0.05  # Minimum document area (5% of image, more permissive)
     DESKEW_ANGLE_THRESHOLD: float = 0.5  # Minimum angle in degrees to trigger deskew
     
     class Config:

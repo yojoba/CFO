@@ -2,13 +2,17 @@ services:
   postgres:
     image: ankane/pgvector:v0.5.1
     container_name: agentcfo_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-agentcfo}
       POSTGRES_USER: ${POSTGRES_USER:-agentcfo}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
     ports:
       - "${POSTGRES_PORT:-5433}:5432"
     healthcheck:
@@ -19,19 +23,28 @@ services:
     networks:
       - agentcfo_network
       - flowbiz_ext
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: agentcfo_backend
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-agentcfo}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-agentcfo}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
       JWT_ALGORITHM: HS256
       JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-1440}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
       UPLOAD_DIR: /app/uploads
       MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-10}
       GOOGLE_CLOUD_VISION_API_KEY: ${GOOGLE_CLOUD_VISION_API_KEY}
@@ -40,6 +53,9 @@ services:
       KEEP_ORIGINAL_FILES: ${KEEP_ORIGINAL_FILES:-true}
       OCR_PDF_QUALITY: ${OCR_PDF_QUALITY:-high}
       FILING_CABINET_YEAR_SOURCE: ${FILING_CABINET_YEAR_SOURCE:-document_date}
+      # Performance settings
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
     volumes:
       - ./backend:/app
       - upload_data:/app/uploads
@@ -51,7 +67,15 @@ services:
     networks:
       - agentcfo_network
       - flowbiz_ext
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4 --loop uvloop --timeout-keep-alive 30
+    deploy:
+      resources:
+        limits:
+          cpus: '3'
+          memory: 3G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   frontend:
     build:
@@ -59,9 +83,11 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: agentcfo_frontend
+    restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_OPTIONS: "--max-old-space-size=2048"
+      WATCHPACK_POLLING: "false"
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -73,7 +99,14 @@ services:
     networks:
       - agentcfo_network
       - flowbiz_ext
-    command: npm run dev
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
 volumes:
   postgres_data:
